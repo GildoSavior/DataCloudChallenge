@@ -2,7 +2,7 @@ package com.datacloudchallenge.AdminCliente.data.enums;
 
 import lombok.Getter;
 
-@Getter
+
 public enum AccessLevel {
     SUPER_ADMIN("Super", "Tem acesso total ao sistema"),
     ADMIN("Admin", "Tem acesso limitados aos clientes "),
@@ -14,5 +14,13 @@ public enum AccessLevel {
     AccessLevel(String displayName, String description) {
         this.displayName = displayName;
         this.description = description;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }
