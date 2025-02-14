@@ -1,24 +1,21 @@
 package com.datacloudchallenge.AdminCliente.domain.dtos.auth.signup;
 
-import com.datacloudchallenge.AdminCliente.data.models.User;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.datacloudchallenge.AdminCliente.data.models.UserModel;
 
 
 public class SignUpResponse {
-    private User user;
+    private UserModel user;
     private String jwtToken;
 
     public SignUpResponse() {
     }
 
-    public SignUpResponse(User user, String jwtToken) {
+    public SignUpResponse(UserModel user, String jwtToken) {
         this.user = user;
         this.jwtToken = jwtToken;
     }
 
-    public User getUser() {
+    public UserModel getUser() {
         return user;
     }
 
@@ -26,7 +23,7 @@ public class SignUpResponse {
         return jwtToken;
     }
 
-    public void setUser(User user) {
+    public void setUser(UserModel user) {
         this.user = user;
     }
 

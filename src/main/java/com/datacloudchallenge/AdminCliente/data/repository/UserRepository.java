@@ -1,14 +1,16 @@
 package com.datacloudchallenge.AdminCliente.data.repository;
 
-import com.datacloudchallenge.AdminCliente.data.models.User;
+import com.datacloudchallenge.AdminCliente.data.models.UserModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.UUID;
+import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID> {
-    User findByEmail(String email);
+public interface UserRepository extends JpaRepository<UserModel, Long> {
+    UserModel findByEmail(String email);
+
+    Optional<UserModel> findByPhoneNumber(String phoneNumber);
 
     void deleteByEmail(String email);
 

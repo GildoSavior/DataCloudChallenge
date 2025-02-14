@@ -4,45 +4,38 @@ import com.datacloudchallenge.AdminCliente.data.enums.AccessLevel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
-import java.util.UUID;
 
 @Entity(name = "users")
-public class User {
+public class UserModel {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @NotNull
-    @Size(min = 6)
     private String name;
 
     private String imageUrl;
 
     private Date data;
 
-    @NotNull
-    @Size(min = 9, max = 9)
+    @Column(name = "phone_number", length = 9, nullable = false)
     private String phoneNumber;
 
-    @NotNull
-    @Email
     private String email;
 
-    @NotNull
-    @Size(min = 6)
+
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @NotNull
     private AccessLevel accessLevel;
 
     private Date lastLogin;
 
-    public UUID getId() {
+    private boolean enabled;
+
+    public Long getId() {
         return id;
     }
 
@@ -78,7 +71,11 @@ public class User {
         return lastLogin;
     }
 
-    public void setId(UUID id) {
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -114,10 +111,16 @@ public class User {
         this.lastLogin = lastLogin;
     }
 
-    public User() {
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
-    public User(UUID id, String name, String imageUrl, Date data, String phoneNumber, String email, String password, AccessLevel accessLevel, Date lastLogin) {
+    public UserModel() {
+    }
+
+
+
+    public UserModel(Long id, String name, String imageUrl, Date data, String phoneNumber, String email, String password, AccessLevel accessLevel, Date lastLogin, boolean enabled) {
         this.id = id;
         this.name = name;
         this.imageUrl = imageUrl;
@@ -127,5 +130,6 @@ public class User {
         this.password = password;
         this.accessLevel = accessLevel;
         this.lastLogin = lastLogin;
+        this.enabled = enabled;
     }
 }

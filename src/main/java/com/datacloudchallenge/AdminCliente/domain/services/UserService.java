@@ -1,27 +1,25 @@
-package com.datacloudchallenge.AdminCliente.domain.interactor;
+package com.datacloudchallenge.AdminCliente.domain.services;
 
-import com.datacloudchallenge.AdminCliente.data.models.User;
+import com.datacloudchallenge.AdminCliente.data.models.UserModel;
 import com.datacloudchallenge.AdminCliente.data.repository.UserRepository;
 import com.datacloudchallenge.AdminCliente.domain.dtos.Result;
 import com.datacloudchallenge.AdminCliente.domain.usecase.UserUseCase;
 import com.datacloudchallenge.AdminCliente.domain.utils.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
-public class UserInteractor implements UserUseCase {
+public class UserService implements UserUseCase {
 
     @Autowired
     private UserRepository repository;
 
     @Override
-    public Result<List<User>> findAll() {
+    public Result<List<UserModel>> findAll() {
         try {
-            List<User> allUsers = repository.findAll();
+            List<UserModel> allUsers = repository.findAll();
             return  Result.success(allUsers);
         } catch (Exception e) {
             return Result.failure(e.getMessage());
@@ -29,13 +27,13 @@ public class UserInteractor implements UserUseCase {
     }
 
     @Override
-    public Result<User> findUserById(UUID id) {
+    public Result<UserModel> findUserById(Long id) {
         try {
 
             if(id.toString().isBlank())
                 Result.failure("O id deve estar preenchido");
 
-            User user = repository.findById(id).orElseThrow(() -> new Exception("Não existe utilizador com esse id: ${id} !"));
+            UserModel user = repository.findById(id).orElseThrow(() -> new Exception("Não existe utilizador com esse id: ${id} !"));
             return  Result.success(user);
         } catch (Exception e) {
             return Result.failure(e.getMessage());
@@ -43,13 +41,13 @@ public class UserInteractor implements UserUseCase {
     }
 
     @Override
-    public Result<User> findUserByEmail(String email) {
+    public Result<UserModel> findUserByEmail(String email) {
         try {
 
             if(email.isBlank())
                 Result.failure("O emal deve estar preenchido");
 
-            User user = repository.findByEmail(email);
+            UserModel user = repository.findByEmail(email);
 
             if(user == null ) {
                 Result.failure("Não existe nenhum utilizador com este email: ${email}");
@@ -61,12 +59,12 @@ public class UserInteractor implements UserUseCase {
     }
 
     @Override
-    public Result<User> createUser(User user) {
+    public Result<UserModel> createUser(UserModel user) {
         try {
                 String erros = Validator.validateUser(user);
                 if (!erros.isEmpty()) return Result.failure(erros);
 
-                User userSaved = repository.save(user);
+                UserModel userSaved = repository.save(user);
 
             return Result.success(user);
 
@@ -76,14 +74,14 @@ public class UserInteractor implements UserUseCase {
     }
 
     @Override
-    public Result<User> updateUser(User user) {
+    public Result<UserModel> updateUser(UserModel user) {
         try {
 
             String errors = Validator.validateUser(user);
 
             if (!errors.isEmpty()) return Result.failure(errors);
 
-            User userToUpdate = repository.findByEmail(user.getEmail());
+            UserModel userToUpdate = repository.findByEmail(user.getEmail());
 
             if(userToUpdate == null) return Result.failure("Não existe utilizador com este email: ${user.getEmail()}");
 
@@ -105,7 +103,7 @@ public class UserInteractor implements UserUseCase {
     public Result<String> deleteUser(String email) {
         try {
 
-            User user = repository.findByEmail(email);
+            UserModel user = repository.findByEmail(email);
 
             if(user == null) return Result.failure("Não existe utilizador com este email: ${user.getEmail()}");
 

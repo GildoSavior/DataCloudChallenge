@@ -1,9 +1,9 @@
 package com.datacloudchallenge.AdminCliente.domain.utils;
 
-import com.datacloudchallenge.AdminCliente.data.models.User;
+import com.datacloudchallenge.AdminCliente.data.models.UserModel;
 
 public class Validator {
-    public static String validateUser(User user) {
+    public static String validateUser(UserModel user) {
         StringBuilder errors = new StringBuilder();
 
         if (user.getName() == null || user.getName().isEmpty()) {
