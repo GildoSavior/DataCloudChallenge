@@ -1,8 +1,5 @@
 package com.datacloudchallenge.AdminCliente.domain.dtos;
 
-import lombok.Data;
-
-
 public class HttpResponse<T> {
     private String message;
     private T data;

@@ -4,7 +4,6 @@ import com.datacloudchallenge.AdminCliente.data.enums.AccessLevel;
 import com.datacloudchallenge.AdminCliente.data.models.UserModel;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class UserDto {
 

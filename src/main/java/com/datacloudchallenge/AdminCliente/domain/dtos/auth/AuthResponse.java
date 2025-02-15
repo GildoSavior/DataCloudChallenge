@@ -1,8 +1,7 @@
 package com.datacloudchallenge.AdminCliente.domain.dtos.auth;
 
 import com.datacloudchallenge.AdminCliente.data.enums.AccessLevel;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+
 
 public class AuthResponse {
     private String jwtToken;
