@@ -1,23 +1,22 @@
-package com.datacloudchallenge.AdminCliente.domain.dtos.auth.login;
+package com.datacloudchallenge.AdminCliente.domain.dtos.auth;
 
 import com.datacloudchallenge.AdminCliente.data.enums.AccessLevel;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import lombok.Data;
 
-public class LoginResponse {
+public class AuthResponse {
     private String jwtToken;
     private String phoneNumber;
     @Enumerated(EnumType.STRING)
     private AccessLevel accessLevel;
 
-    public LoginResponse(String jwtToken, String phoneNumber, AccessLevel accessLevel) {
+    public AuthResponse(String phoneNumber, AccessLevel accessLevel, String jwtToken) {
         this.jwtToken = jwtToken;
         this.phoneNumber = phoneNumber;
         this.accessLevel = accessLevel;
     }
 
-    public LoginResponse() {
+    public AuthResponse() {
     }
 
     public String getJwtToken() {

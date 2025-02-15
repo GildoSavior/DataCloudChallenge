@@ -40,12 +40,12 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorizeRequests ->
-                authorizeRequests.requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/auth/signin", "/api/auth/signup").permitAll()
+                authorizeRequests
+                        .requestMatchers("/api/auth/login", "/api/auth/signup").permitAll()
                         .anyRequest().authenticated());
 
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler));
+         http.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler));
         //http.httpBasic(withDefaults());
         http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
         http.csrf(AbstractHttpConfigurer::disable);
@@ -62,10 +62,10 @@ public class SecurityConfig {
         manager.setAuthoritiesByUsernameQuery("SELECT phone_number, authority FROM authorities WHERE phone_number = ?");
 
         manager.setCreateUserSql("INSERT INTO users (phone_number, password, enabled) VALUES (?, ?, ?)");
-
         manager.setUpdateUserSql("UPDATE users SET password = ?, enabled = ? WHERE phone_number = ?");
-
         manager.setDeleteUserSql("DELETE FROM users WHERE phone_number = ?");
+
+        manager.setCreateAuthoritySql("INSERT INTO authorities (phone_number, authority) VALUES (?, ?)");
 
         return manager;
     }

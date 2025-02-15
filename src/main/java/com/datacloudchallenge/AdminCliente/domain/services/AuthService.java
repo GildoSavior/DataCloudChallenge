@@ -2,16 +2,14 @@ package com.datacloudchallenge.AdminCliente.domain.services;
 
 import com.datacloudchallenge.AdminCliente.config.JwtUtils;
 import com.datacloudchallenge.AdminCliente.data.enums.AccessLevel;
-import com.datacloudchallenge.AdminCliente.data.mappers.UserMapper;
 import com.datacloudchallenge.AdminCliente.data.models.UserModel;
 import com.datacloudchallenge.AdminCliente.data.repository.UserRepository;
 import com.datacloudchallenge.AdminCliente.domain.dtos.Result;
 import com.datacloudchallenge.AdminCliente.domain.dtos.auth.login.LoginRequest;
-import com.datacloudchallenge.AdminCliente.domain.dtos.auth.login.LoginResponse;
+import com.datacloudchallenge.AdminCliente.domain.dtos.auth.AuthResponse;
 import com.datacloudchallenge.AdminCliente.domain.dtos.auth.signup.SignUpRequest;
-import com.datacloudchallenge.AdminCliente.domain.dtos.auth.signup.SignUpResponse;
+import com.datacloudchallenge.AdminCliente.domain.usecase.AuthUseCase;
 import com.datacloudchallenge.AdminCliente.domain.utils.Validator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,69 +21,77 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Service;
 
-import javax.sql.DataSource;
-import java.util.List;
-import java.util.stream.Collectors;
-
-
 @Service
-public class AuthService  {
+public class AuthService implements AuthUseCase {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final JwtUtils jwtUtils;
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
+    private final JdbcUserDetailsManager userDetailsManager;
 
-    @Autowired
-    private JwtUtils jwtUtils;
+    public AuthService(
+            UserRepository userRepository,
+            JwtUtils jwtUtils,
+            AuthenticationManager authenticationManager,
+            PasswordEncoder passwordEncoder,
+            JdbcUserDetailsManager userDetailsManager) {
+        this.userRepository = userRepository;
+        this.jwtUtils = jwtUtils;
+        this.authenticationManager = authenticationManager;
+        this.passwordEncoder = passwordEncoder;
+        this.userDetailsManager = userDetailsManager;
+    }
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
 
-    @Autowired
-    DataSource dataSource;
-
-    public Result<SignUpResponse> signUp(SignUpRequest request) {
+    @Override
+    public Result<AuthResponse> createUser(SignUpRequest request) {
 
         try {
             if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
                 return Result.failure("Já existe um utilizador com este número de telefone");
             }
 
-            UserModel user = UserMapper.toUser(request);
-            String errors = Validator.validateUser(user);
+            if (userRepository.existsByEmail(request.getEmail())) {
+                return Result.failure("Já existe um utilizador com este email");
+            }
+
+            UserModel user = SignUpRequest.signupRequestToUser(request);
+            String errors = Validator.validateUserCreate(user);
 
             if (!errors.isEmpty()) {
                 return Result.failure(errors);
             }
 
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            user.setEnabled(true);
+            String encodedPassword = passwordEncoder.encode(request.getPassword());
 
-            UserModel userCreated = userRepository.save(user);
-            userRepository.flush();
-
-            JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
-            userDetailsManager.setCreateUserSql("INSERT INTO users (phone_number, password, enabled) VALUES (?, ?, ?)");
-            userDetailsManager.setCreateAuthoritySql("INSERT INTO authorities (phone_number, authority) VALUES (?,?)");
-
-            UserDetails userDetails = User.withUsername(userCreated.getPhoneNumber())
-                    .password(userCreated.getPassword())
-                    .roles(AccessLevel.CLIENT.name())
+            UserDetails userDetails = User.withUsername(request.getPhoneNumber())
+                    .password(encodedPassword)
+                    .authorities(user.getAccessLevel().name())
                     .build();
 
             userDetailsManager.createUser(userDetails);
 
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userCreated.getPhoneNumber(), userCreated.getPassword())
+                    new UsernamePasswordAuthenticationToken(request.getPhoneNumber(), request.getPassword())
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
 
-            SignUpResponse response = new SignUpResponse(userCreated, jwtToken);
+            user.setPassword(encodedPassword);
+
+            UserModel userUpdated = userRepository.findByPhoneNumber(user.getPhoneNumber())
+                    .orElseThrow(() -> new Exception("Utilizador não existe"));
+            userUpdated.setName(user.getName());
+            userUpdated.setEmail(user.getEmail());
+
+            userRepository.save(userUpdated);
+            userRepository.flush();
+
+            AuthResponse response = new AuthResponse(user.getPhoneNumber(), user.getAccessLevel(), jwtToken);
 
             return Result.success(response);
 
@@ -94,7 +100,8 @@ public class AuthService  {
         }
     }
 
-    public Result<LoginResponse> login(LoginRequest request) {
+    @Override
+    public Result<AuthResponse> login(LoginRequest request) {
         try {
 
             if (!userRepository.existsByPhoneNumber(request.getPhoneNumber()))
@@ -110,15 +117,27 @@ public class AuthService  {
 
             String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
 
-            List<String> roles = userDetails.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList());
+            String role = userDetails.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority).findFirst().get();
 
-            LoginResponse response = new LoginResponse(userDetails.getUsername(), roles, jwtToken);
+            AuthResponse response = new AuthResponse(request.getPhoneNumber(),  AccessLevel.valueOf(role), jwtToken);
+
+            return Result.success(response);
 
         } catch (Exception e) {
             return Result.failure(e.getMessage());
         }
     }
+
+    @Override
+    public Result<String> logout() {
+        try {
+            SecurityContextHolder.clearContext();
+            return Result.success("Logout efetuado com sucesso");
+        } catch (Exception e) {
+            return Result.failure("Erro ao efetuar logout: " + e.getMessage());
+        }
+    }
+
 
 }

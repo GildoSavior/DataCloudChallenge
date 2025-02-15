@@ -1,8 +1,7 @@
 package com.datacloudchallenge.AdminCliente.domain.dtos.auth.signup;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import lombok.AccessLevel;
+import com.datacloudchallenge.AdminCliente.data.enums.AccessLevel;
+import com.datacloudchallenge.AdminCliente.data.models.UserModel;
 import lombok.Data;
 
 @Data
@@ -54,7 +53,13 @@ public class SignUpRequest {
         return password;
     }
 
-    //    TODO.GS.14.02.2024 - Validar se há necessidade de manter este atributo nesta class
-//    @Enumerated(EnumType.STRING)
-//    private AccessLevel accessLevel;
+    public static UserModel signupRequestToUser(SignUpRequest request) {
+        UserModel user = new UserModel();
+        user.setName(request.getName());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword());
+        user.setAccessLevel(AccessLevel.ROLE_ADMIN);
+        return user;
+    }
 }
