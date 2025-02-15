@@ -1,7 +1,7 @@
 package com.datacloudchallenge.AdminCliente.domain.utils;
 
 import com.datacloudchallenge.AdminCliente.data.models.UserModel;
-import com.datacloudchallenge.AdminCliente.domain.dtos.user.UpdateUserClientResquest;
+import com.datacloudchallenge.AdminCliente.domain.dtos.user.UserDto;
 
 import java.util.regex.Pattern;
 
@@ -37,7 +37,7 @@ public class Validator {
         return errors.toString().trim();
     }
 
-    public static String validateUserUpdate(UpdateUserClientResquest user) {
+    public static String validateUserUpdate(UserDto user) {
         StringBuilder errors = new StringBuilder();
 
         if (user.getName() == null || user.getName().isEmpty()) {

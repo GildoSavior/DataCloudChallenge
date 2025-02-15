@@ -59,7 +59,7 @@ public class SignUpRequest {
         user.setPhoneNumber(request.getPhoneNumber());
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
-        user.setAccessLevel(AccessLevel.ROLE_ADMIN);
+        user.setAccessLevel(AccessLevel.ROLE_CLIENT);
         return user;
     }
 }

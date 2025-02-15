@@ -6,16 +6,12 @@ import com.datacloudchallenge.AdminCliente.data.mappers.UserMapper;
 import com.datacloudchallenge.AdminCliente.data.models.UserModel;
 import com.datacloudchallenge.AdminCliente.data.repository.UserRepository;
 import com.datacloudchallenge.AdminCliente.domain.dtos.Result;
-import com.datacloudchallenge.AdminCliente.domain.dtos.user.UpdateUserClientResquest;
 import com.datacloudchallenge.AdminCliente.domain.dtos.user.UserDto;
 import com.datacloudchallenge.AdminCliente.domain.usecase.UserUseCase;
 import com.datacloudchallenge.AdminCliente.domain.utils.SecurityUtil;
 import com.datacloudchallenge.AdminCliente.domain.utils.Validator;
 import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +19,7 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,10 +43,13 @@ public class UserService implements UserUseCase {
     @Override
     public Result<List<UserDto>> findAll() {
         try {
+            String authenticatedPhoneNumber = SecurityUtil.getAuthenticatedPhoneNumber();
             List<UserDto> allUsers = repository.findAll()
                     .stream()
                     .map(UserDto::userToUserDto)
+                    .sorted((u1, u2) -> u1.getPhoneNumber().equals(authenticatedPhoneNumber) ? -1 : (u2.getPhoneNumber().equals(authenticatedPhoneNumber) ? 1 : 0))
                     .collect(Collectors.toList());
+
 
 
             return  Result.success(allUsers, "Dados carregados com sucesso");
@@ -122,9 +122,11 @@ public class UserService implements UserUseCase {
 
             UserModel userUpdated = repository.findByPhoneNumber(user.getPhoneNumber())
                     .orElseThrow(() -> new Exception("Utilizador não existe"));
+
             userUpdated.setName(user.getName());
             userUpdated.setEmail(user.getEmail());
             userUpdated.setImageUrl(user.getImageUrl());
+            userUpdated.setAccessLevel(user.getAccessLevel());
 
             repository.save(userUpdated);
 
@@ -136,24 +138,30 @@ public class UserService implements UserUseCase {
     }
 
     @Override
-    public Result<UserDto> updateUser( UpdateUserClientResquest user) {
+    public Result<UserDto> updateUser(String userToUpdatePhoneNumber, UserDto resquest) {
         try {
-
-            String errors = Validator.validateUserUpdate(user);
-
+            String errors = Validator.validateUserUpdate(resquest);
             if (!errors.isEmpty()) return Result.failure(errors);
 
+            boolean isUpdatingOwnInfo = userToUpdatePhoneNumber.equals(SecurityUtil.getAuthenticatedPhoneNumber());
+            AccessLevel authenticatedUserRole = AccessLevel.valueOf(SecurityUtil.getRole());
 
-            String authenticatedPhoneNumber = SecurityUtil.getAuthenticatedPhoneNumber();
+            UserModel userToUpdate = repository.findByPhoneNumber(userToUpdatePhoneNumber)
+                    .orElseThrow(() -> new Exception("Utilizador não encontrado"));
 
-            UserModel userToUpdate = repository.findByPhoneNumber(authenticatedPhoneNumber)
-                    .orElseThrow(() -> new Exception("Este utilizador não existe"));
+            if (hasPermission(isUpdatingOwnInfo, resquest.getAccessLevel())) {
+                return Result.failure("Você não tem permissão para realizar essa ação.");
+            }
 
-            userToUpdate.setName(user.getName());
-            userToUpdate.setImageUrl(user.getImageUrl());
+            if (getAuthenticatedUserRole() == AccessLevel.ROLE_SUPER_ADMIN) {
+                userToUpdate.setAccessLevel(resquest.getAccessLevel());
+            }
+
+            userToUpdate.setName(resquest.getName());
+            userToUpdate.setImageUrl(resquest.getImageUrl());
             repository.save(userToUpdate);
 
-            return Result.success(UserDto.userToUserDto(userToUpdate), "Utilizador actualizado com sucesso");
+            return Result.success(UserDto.userToUserDto(userToUpdate), "Utilizador atualizado com sucesso");
 
         } catch(Exception e) {
             return Result.failure(e.getMessage());
@@ -162,31 +170,64 @@ public class UserService implements UserUseCase {
 
     @Transactional
     @Override
-    public Result<String> deleteUser(String phoneNumber) {
+    public Result<String> deleteUserByPhoneNumber(String phoneNumber) {
         try {
-            if(!repository.existsByPhoneNumber(phoneNumber)) return  Result.failure("Este não existe utilizador");
+            if (!repository.existsByPhoneNumber(phoneNumber)) {
+                return Result.failure("Este utilizador não existe");
+            }
+
+            boolean isUpdatingOwnInfo = phoneNumber.equals(SecurityUtil.getAuthenticatedPhoneNumber());
+
+            AccessLevel userToDeleteAccessLevel = getTargetUser(phoneNumber).getAccessLevel();
+
+            if (hasPermission(isUpdatingOwnInfo, userToDeleteAccessLevel)) {
+                return Result.failure("Você não tem permissão para realizar essa ação.");
+            }
 
             repository.deleteByPhoneNumber(phoneNumber);
-
             return Result.success(null, "Utilizador eliminado com sucesso");
 
         } catch(Exception e) {
             return Result.failure(e.getMessage());
         }
     }
+
     @Override
-    public Result<UserModel> findUserByPhoneNumber(String phoneNumber) {
+    public Result<UserDto> findUserByPhoneNumber(String phoneNumber) {
         try {
+            if (phoneNumber.isBlank()) return Result.failure("O número de telefone deve estar preenchido");
 
-            if(phoneNumber.isBlank())
-               return Result.failure("O numero de telefone deve estar preenchido");
+            boolean isUpdatingOwnInfo = phoneNumber.equals(SecurityUtil.getAuthenticatedPhoneNumber());
 
-            UserModel user = repository.findByPhoneNumber(phoneNumber)
-                    .orElseThrow(() -> new Exception("Não existe nenhum utilizador com este número: ${phoneNumber}"));
+            AccessLevel userAccessLevel = getTargetUser(phoneNumber).getAccessLevel();
 
-            return  Result.success(user, "Dados carregados com sucesso");
+            if (hasPermission(isUpdatingOwnInfo, userAccessLevel)) {
+                return Result.failure("Você não tem permissão para realizar essa ação.");
+            }
+
+            UserModel user = getTargetUser(phoneNumber);
+            return Result.success(UserDto.userToUserDto(user), "Dados carregados com sucesso");
+
         } catch (Exception e) {
             return Result.failure(e.getMessage());
         }
+    }
+
+    private AccessLevel getAuthenticatedUserRole() {
+         return AccessLevel.valueOf(SecurityUtil.getRole());
+    }
+
+    private boolean hasPermission(boolean isUpdatingOwnInfo, AccessLevel targetRole) {
+        AccessLevel authenticatedRole = AccessLevel.valueOf(SecurityUtil.getRole());
+
+        if (authenticatedRole == AccessLevel.ROLE_CLIENT && !isUpdatingOwnInfo) {
+            return true;
+        }
+        return authenticatedRole == AccessLevel.ROLE_ADMIN && !isUpdatingOwnInfo && targetRole != AccessLevel.ROLE_CLIENT;
+    }
+
+    private UserModel getTargetUser(String phoneNumber) {
+        return repository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new NoSuchElementException("Usuário autenticado não encontrado"));
     }
 }

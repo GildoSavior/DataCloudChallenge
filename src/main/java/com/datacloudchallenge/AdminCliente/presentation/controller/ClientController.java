@@ -1,8 +1,6 @@
 package com.datacloudchallenge.AdminCliente.presentation.controller;
 
-import com.datacloudchallenge.AdminCliente.data.models.UserModel;
 import com.datacloudchallenge.AdminCliente.domain.dtos.Result;
-import com.datacloudchallenge.AdminCliente.domain.dtos.user.UpdateUserClientResquest;
 import com.datacloudchallenge.AdminCliente.domain.dtos.user.UserDto;
 import com.datacloudchallenge.AdminCliente.domain.usecase.UserUseCase;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +20,14 @@ public class ClientController {
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(Authentication authentication) {
         String username = authentication.getName();
-        Result<UserModel> result = userUseCase.findUserByPhoneNumber(username);
+        Result<UserDto> result = userUseCase.findUserByPhoneNumber(username);
         return result.isOk() ? ResponseEntity.ok(result.getData()) : ResponseEntity.badRequest().body(result.getMessage());
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestBody UpdateUserClientResquest user) {
+    public ResponseEntity<?> updateProfile(@RequestParam String userToUpdatePhoneNumber, @RequestBody UserDto user) {
 
-        Result<UserDto> result = userUseCase.updateUser(user);
+        Result<UserDto> result = userUseCase.updateUser(userToUpdatePhoneNumber, user);
         return result.isOk() ? ResponseEntity.ok(result.getData()) : ResponseEntity.badRequest().body(result.getMessage());
     }
 
@@ -37,7 +35,7 @@ public class ClientController {
     public ResponseEntity<?> updateProfile(Authentication authentication) {
         String phoneNumber = authentication.getName();
 
-        Result<String> result = userUseCase.deleteUser(phoneNumber);
+        Result<String> result = userUseCase.deleteUserByPhoneNumber(phoneNumber);
         return result.isOk() ? ResponseEntity.ok(result.getData()) : ResponseEntity.badRequest().body(result.getMessage());
     }
 

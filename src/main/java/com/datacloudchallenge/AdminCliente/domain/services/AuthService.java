@@ -87,6 +87,7 @@ public class AuthService implements AuthUseCase {
                     .orElseThrow(() -> new Exception("Utilizador não existe"));
             userUpdated.setName(user.getName());
             userUpdated.setEmail(user.getEmail());
+            userUpdated.setAccessLevel(user.getAccessLevel());
 
             userRepository.save(userUpdated);
             userRepository.flush();
