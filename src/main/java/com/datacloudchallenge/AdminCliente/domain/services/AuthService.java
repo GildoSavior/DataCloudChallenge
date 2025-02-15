@@ -93,7 +93,7 @@ public class AuthService implements AuthUseCase {
 
             AuthResponse response = new AuthResponse(user.getPhoneNumber(), user.getAccessLevel(), jwtToken);
 
-            return Result.success(response);
+            return Result.success(response, "Utilizador criado com sucesso");
 
         } catch (Exception e) {
             return Result.failure(e.getMessage());
@@ -122,7 +122,7 @@ public class AuthService implements AuthUseCase {
 
             AuthResponse response = new AuthResponse(request.getPhoneNumber(),  AccessLevel.valueOf(role), jwtToken);
 
-            return Result.success(response);
+            return Result.success(response, "Login efetuado com sucesso");
 
         } catch (Exception e) {
             return Result.failure(e.getMessage());
@@ -133,7 +133,7 @@ public class AuthService implements AuthUseCase {
     public Result<String> logout() {
         try {
             SecurityContextHolder.clearContext();
-            return Result.success("Logout efetuado com sucesso");
+            return Result.success(null, "Logout efetuado com sucesso");
         } catch (Exception e) {
             return Result.failure("Erro ao efetuar logout: " + e.getMessage());
         }

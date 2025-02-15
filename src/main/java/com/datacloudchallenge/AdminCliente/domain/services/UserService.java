@@ -9,6 +9,7 @@ import com.datacloudchallenge.AdminCliente.domain.dtos.Result;
 import com.datacloudchallenge.AdminCliente.domain.dtos.user.UpdateUserClientResquest;
 import com.datacloudchallenge.AdminCliente.domain.dtos.user.UserDto;
 import com.datacloudchallenge.AdminCliente.domain.usecase.UserUseCase;
+import com.datacloudchallenge.AdminCliente.domain.utils.SecurityUtil;
 import com.datacloudchallenge.AdminCliente.domain.utils.Validator;
 import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -51,7 +52,7 @@ public class UserService implements UserUseCase {
                     .collect(Collectors.toList());
 
 
-            return  Result.success(allUsers);
+            return  Result.success(allUsers, "Dados carregados com sucesso");
         } catch (Exception e) {
             return Result.failure(e.getMessage());
         }
@@ -65,7 +66,7 @@ public class UserService implements UserUseCase {
                 return Result.failure("O id deve estar preenchido");
 
             UserModel user = repository.findById(id).orElseThrow(() -> new Exception("Não existe utilizador com esse id: ${id} !"));
-            return  Result.success(UserDto.userToUserDto(user));
+            return  Result.success(UserDto.userToUserDto(user), "Dados carregados com sucesso");
 
         } catch (Exception e) {
             return Result.failure(e.getMessage());
@@ -82,7 +83,7 @@ public class UserService implements UserUseCase {
             UserModel user = repository.findByEmail(email)
                     .orElseThrow(() -> new Exception("Não existe nenhum utilizador com este email: ${email"));
 
-            return  Result.success(UserDto.userToUserDto(user));
+            return  Result.success(UserDto.userToUserDto(user), "Dados carregados com sucesso");
         } catch (Exception e) {
             return Result.failure(e.getMessage());
         }
@@ -92,13 +93,7 @@ public class UserService implements UserUseCase {
     public Result<UserDto> createUser(UserDto request) {
         try {
 
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-            String role = authentication.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .findFirst()
-                    .orElse("");
-
+            String role = SecurityUtil.getRole();
 
             if(request.getAccessLevel().equals(AccessLevel.ROLE_SUPER_ADMIN))
                 return Result.failure("Só pode ter um super admin no sistema");
@@ -133,7 +128,7 @@ public class UserService implements UserUseCase {
 
             repository.save(userUpdated);
 
-            return Result.success(request);
+            return Result.success(request, "Utilizador criado com sucesso");
 
         } catch (Exception e) {
             return Result.failure(e.getMessage());
@@ -141,21 +136,24 @@ public class UserService implements UserUseCase {
     }
 
     @Override
-    public Result<UserDto> updateUser(String phoneNumber, UpdateUserClientResquest user) {
+    public Result<UserDto> updateUser( UpdateUserClientResquest user) {
         try {
 
             String errors = Validator.validateUserUpdate(user);
 
             if (!errors.isEmpty()) return Result.failure(errors);
 
-            UserModel userToUpdate = repository.findByPhoneNumber(phoneNumber)
+
+            String authenticatedPhoneNumber = SecurityUtil.getAuthenticatedPhoneNumber();
+
+            UserModel userToUpdate = repository.findByPhoneNumber(authenticatedPhoneNumber)
                     .orElseThrow(() -> new Exception("Este utilizador não existe"));
 
             userToUpdate.setName(user.getName());
             userToUpdate.setImageUrl(user.getImageUrl());
             repository.save(userToUpdate);
 
-            return Result.success(UserDto.userToUserDto(userToUpdate));
+            return Result.success(UserDto.userToUserDto(userToUpdate), "Utilizador actualizado com sucesso");
 
         } catch(Exception e) {
             return Result.failure(e.getMessage());
@@ -170,7 +168,7 @@ public class UserService implements UserUseCase {
 
             repository.deleteByPhoneNumber(phoneNumber);
 
-            return Result.success("Utilizador eliminado com sucesso");
+            return Result.success(null, "Utilizador eliminado com sucesso");
 
         } catch(Exception e) {
             return Result.failure(e.getMessage());
@@ -186,7 +184,7 @@ public class UserService implements UserUseCase {
             UserModel user = repository.findByPhoneNumber(phoneNumber)
                     .orElseThrow(() -> new Exception("Não existe nenhum utilizador com este número: ${phoneNumber}"));
 
-            return  Result.success(user);
+            return  Result.success(user, "Dados carregados com sucesso");
         } catch (Exception e) {
             return Result.failure(e.getMessage());
         }

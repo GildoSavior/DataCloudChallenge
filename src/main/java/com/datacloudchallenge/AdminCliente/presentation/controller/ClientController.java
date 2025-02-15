@@ -27,10 +27,9 @@ public class ClientController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(Authentication authentication,  @RequestBody UpdateUserClientResquest user) {
-        String phoneNumber = authentication.getName();
+    public ResponseEntity<?> updateProfile(@RequestBody UpdateUserClientResquest user) {
 
-        Result<UserDto> result = userUseCase.updateUser(phoneNumber, user);
+        Result<UserDto> result = userUseCase.updateUser(user);
         return result.isOk() ? ResponseEntity.ok(result.getData()) : ResponseEntity.badRequest().body(result.getMessage());
     }
 

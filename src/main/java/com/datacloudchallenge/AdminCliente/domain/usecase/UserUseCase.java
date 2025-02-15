@@ -12,7 +12,7 @@ public interface UserUseCase {
     Result<UserDto> findUserById(Long id);
     Result<UserDto> findUserByEmail(String email);
     Result<UserDto> createUser(UserDto user);
-    Result<UserDto> updateUser(String phoneNumber, UpdateUserClientResquest user );
+    Result<UserDto> updateUser(UpdateUserClientResquest user );
     Result<String> deleteUser(String phoneNumber);
 
     Result<UserModel> findUserByPhoneNumber(String username);

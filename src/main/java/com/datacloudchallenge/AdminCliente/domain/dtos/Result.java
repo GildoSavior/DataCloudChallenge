@@ -29,8 +29,8 @@ public class Result<T> {
         return data;
     }
 
-    public static <T> Result<T> success(T data) {
-        return new Result<>("Successo", true, data);
+    public static <T> Result<T> success(T data, String message) {
+        return new Result<>(message, true, data);
     }
 
     public static <T> Result<T> failure(String message) {
