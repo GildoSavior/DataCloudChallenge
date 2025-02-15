@@ -1,9 +1,11 @@
 package com.datacloudchallenge.AdminCliente.presentation.controller;
 
+import com.datacloudchallenge.AdminCliente.domain.dtos.HttpResponse;
 import com.datacloudchallenge.AdminCliente.domain.dtos.Result;
 import com.datacloudchallenge.AdminCliente.domain.dtos.auth.login.LoginRequest;
 import com.datacloudchallenge.AdminCliente.domain.dtos.auth.AuthResponse;
 import com.datacloudchallenge.AdminCliente.domain.dtos.auth.signup.SignUpRequest;
+import com.datacloudchallenge.AdminCliente.domain.dtos.user.UserDto;
 import com.datacloudchallenge.AdminCliente.domain.usecase.AuthUseCase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,30 +29,23 @@ public class AuthController {
         if(result.isOk())
             return ResponseEntity.ok(result.getData());
 
-        return ResponseEntity.badRequest().body("Erro ao processar a solicitação: " + result.getMessage());
+        HttpResponse<AuthResponse> response = new HttpResponse<>(result.getMessage(), result.getData());
+        return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
 
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> signUp(@RequestBody LoginRequest request) {
-
         Result<AuthResponse> result = authUseCase.login(request);
-        if(result.isOk())
-            return ResponseEntity.ok(result.getData());
-
-        return ResponseEntity.badRequest().body("Erro ao processar a solicitação: " + result.getMessage());
-
+        HttpResponse<AuthResponse> response = new HttpResponse<>(result.getMessage(), result.getData());
+        return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
-
         Result<String> result = authUseCase.logout();
-        if(result.isOk())
-            return ResponseEntity.ok(result.getData());
-
-        return ResponseEntity.badRequest().body("Erro ao processar a solicitação: " + result.getMessage());
-
+        HttpResponse<String> response = new HttpResponse<>(result.getMessage(), result.getData());
+        return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 }
 

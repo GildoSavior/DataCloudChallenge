@@ -146,10 +146,9 @@ public class UserService implements UserUseCase {
             boolean isUpdatingOwnInfo = userToUpdatePhoneNumber.equals(SecurityUtil.getAuthenticatedPhoneNumber());
             AccessLevel authenticatedUserRole = AccessLevel.valueOf(SecurityUtil.getRole());
 
-            UserModel userToUpdate = repository.findByPhoneNumber(userToUpdatePhoneNumber)
-                    .orElseThrow(() -> new Exception("Utilizador não encontrado"));
+            UserModel userToUpdate = getTargetUser(userToUpdatePhoneNumber);
 
-            if (hasPermission(isUpdatingOwnInfo, resquest.getAccessLevel())) {
+            if (!hasPermission(isUpdatingOwnInfo, userToUpdate.getAccessLevel())) {
                 return Result.failure("Você não tem permissão para realizar essa ação.");
             }
 
@@ -180,7 +179,7 @@ public class UserService implements UserUseCase {
 
             AccessLevel userToDeleteAccessLevel = getTargetUser(phoneNumber).getAccessLevel();
 
-            if (hasPermission(isUpdatingOwnInfo, userToDeleteAccessLevel)) {
+            if (!hasPermission(isUpdatingOwnInfo, userToDeleteAccessLevel)) {
                 return Result.failure("Você não tem permissão para realizar essa ação.");
             }
 
@@ -201,7 +200,7 @@ public class UserService implements UserUseCase {
 
             AccessLevel userAccessLevel = getTargetUser(phoneNumber).getAccessLevel();
 
-            if (hasPermission(isUpdatingOwnInfo, userAccessLevel)) {
+            if (!hasPermission(isUpdatingOwnInfo, userAccessLevel)) {
                 return Result.failure("Você não tem permissão para realizar essa ação.");
             }
 
@@ -218,12 +217,16 @@ public class UserService implements UserUseCase {
     }
 
     private boolean hasPermission(boolean isUpdatingOwnInfo, AccessLevel targetRole) {
+
         AccessLevel authenticatedRole = AccessLevel.valueOf(SecurityUtil.getRole());
 
-        if (authenticatedRole == AccessLevel.ROLE_CLIENT && !isUpdatingOwnInfo) {
-            return true;
-        }
-        return authenticatedRole == AccessLevel.ROLE_ADMIN && !isUpdatingOwnInfo && targetRole != AccessLevel.ROLE_CLIENT;
+        if(!authenticatedRole.equals(AccessLevel.ROLE_SUPER_ADMIN) && targetRole.equals(AccessLevel.ROLE_SUPER_ADMIN)) return false;
+
+        if (authenticatedRole == AccessLevel.ROLE_CLIENT && !isUpdatingOwnInfo) return false;
+
+        if(authenticatedRole == AccessLevel.ROLE_ADMIN && !isUpdatingOwnInfo && targetRole != AccessLevel.ROLE_CLIENT) return false;
+
+        return true;
     }
 
     private UserModel getTargetUser(String phoneNumber) {

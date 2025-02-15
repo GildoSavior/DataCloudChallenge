@@ -1,5 +1,6 @@
 package com.datacloudchallenge.AdminCliente.presentation.controller;
 
+import com.datacloudchallenge.AdminCliente.domain.dtos.HttpResponse;
 import com.datacloudchallenge.AdminCliente.domain.dtos.Result;
 import com.datacloudchallenge.AdminCliente.domain.dtos.user.UserDto;
 import com.datacloudchallenge.AdminCliente.domain.usecase.UserUseCase;
@@ -21,35 +22,36 @@ public class AdminController {
     @GetMapping("/users")
     public ResponseEntity<?> findAllClients() {
         Result<List<UserDto>> result = userUseCase.findAll();
-
-        return result.isOk() ? ResponseEntity.ok(result) : ResponseEntity.badRequest().body(result.getMessage());
+        HttpResponse<List<UserDto>> response = new HttpResponse<>(result.getMessage(), result.getData());
+        return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
     @PostMapping("/clients")
     public ResponseEntity<?> createClient(@RequestBody UserDto user) {
         Result<UserDto> result = userUseCase.createUser(user);
-        return result.isOk() ? ResponseEntity.ok(result.getData()) : ResponseEntity.badRequest().body(result.getMessage());
+        return result.isOk() ? ResponseEntity.ok(new HttpResponse<>(result.getMessage(), result.getData())) :
+                ResponseEntity.badRequest().body(new HttpResponse<>(result.getMessage(), result.getData()));
     }
-
 
     @PutMapping("/users")
-    public ResponseEntity<?> updateUser(@RequestParam String userToUpdatePhoneNumber, @RequestBody UserDto user) {
-        Result<UserDto> result = userUseCase.updateUser(userToUpdatePhoneNumber, user);
-        return result.isOk() ? ResponseEntity.ok(result.getData()) : ResponseEntity.badRequest().body(result.getMessage());
+    public ResponseEntity<?> updateUser(@RequestParam String phoneNumber, @RequestBody UserDto user) {
+        Result<UserDto> result = userUseCase.updateUser(phoneNumber, user);
+        HttpResponse<UserDto> response = new HttpResponse<>(result.getMessage(), result.getData());
+        return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/users")
     public ResponseEntity<?> delete(@RequestParam String phoneNumber) {
-
-            Result<String> result = userUseCase.deleteUserByPhoneNumber(phoneNumber);
-            return result.isOk() ? ResponseEntity.ok("Cliente removido com sucesso") : ResponseEntity.badRequest().body(result.getMessage());
-
+        Result<String> result = userUseCase.deleteUserByPhoneNumber(phoneNumber);
+        HttpResponse<String> response = new HttpResponse<>(result.getMessage(), result.getData());
+        return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
     public ResponseEntity<?> getInfo(@RequestParam String phoneNumber) {
         Result<UserDto> result = userUseCase.findUserByPhoneNumber(phoneNumber);
-        return result.isOk() ? ResponseEntity.ok(result.getMessage()) : ResponseEntity.badRequest().body(result.getMessage());
+        HttpResponse<UserDto> response = new HttpResponse<>(result.getMessage(), result.getData());
+        return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
 

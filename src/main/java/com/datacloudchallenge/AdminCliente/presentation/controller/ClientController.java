@@ -1,5 +1,6 @@
 package com.datacloudchallenge.AdminCliente.presentation.controller;
 
+import com.datacloudchallenge.AdminCliente.domain.dtos.HttpResponse;
 import com.datacloudchallenge.AdminCliente.domain.dtos.Result;
 import com.datacloudchallenge.AdminCliente.domain.dtos.user.UserDto;
 import com.datacloudchallenge.AdminCliente.domain.usecase.UserUseCase;
@@ -21,23 +22,23 @@ public class ClientController {
     public ResponseEntity<?> getProfile(Authentication authentication) {
         String username = authentication.getName();
         Result<UserDto> result = userUseCase.findUserByPhoneNumber(username);
-        return result.isOk() ? ResponseEntity.ok(result.getData()) : ResponseEntity.badRequest().body(result.getMessage());
+        HttpResponse<UserDto> response = new HttpResponse<>(result.getMessage(), result.getData());
+        return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestParam String userToUpdatePhoneNumber, @RequestBody UserDto user) {
-
         Result<UserDto> result = userUseCase.updateUser(userToUpdatePhoneNumber, user);
-        return result.isOk() ? ResponseEntity.ok(result.getData()) : ResponseEntity.badRequest().body(result.getMessage());
+        HttpResponse<UserDto> response = new HttpResponse<>(result.getMessage(), result.getData());
+        return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
     @DeleteMapping("/profile")
-    public ResponseEntity<?> updateProfile(Authentication authentication) {
+    public ResponseEntity<?> deleteProfile(Authentication authentication) {
         String phoneNumber = authentication.getName();
-
         Result<String> result = userUseCase.deleteUserByPhoneNumber(phoneNumber);
-        return result.isOk() ? ResponseEntity.ok(result.getData()) : ResponseEntity.badRequest().body(result.getMessage());
+        HttpResponse<String> response = new HttpResponse<>(result.getMessage(), result.getData());
+        return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
-
 
 }

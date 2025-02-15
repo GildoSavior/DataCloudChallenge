@@ -7,7 +7,6 @@ import jakarta.persistence.Enumerated;
 public class AuthResponse {
     private String jwtToken;
     private String phoneNumber;
-    @Enumerated(EnumType.STRING)
     private AccessLevel accessLevel;
 
     public AuthResponse(String phoneNumber, AccessLevel accessLevel, String jwtToken) {
