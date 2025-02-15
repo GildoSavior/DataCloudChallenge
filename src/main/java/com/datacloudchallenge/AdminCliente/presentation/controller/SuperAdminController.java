@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:5500")
 @RestController
 @RequestMapping("/api/super-admin")
 @PreAuthorize("hasRole('SUPER_ADMIN')")
@@ -27,7 +28,7 @@ public class SuperAdminController {
         return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
-    @GetMapping("/users/user")
+    @GetMapping("/user")
     public ResponseEntity<?> getInfo(@RequestParam String phoneNumber) {
         Result<UserDto> result = userUseCase.findUserByPhoneNumber(phoneNumber);
         HttpResponse<UserDto> response = new HttpResponse<>(result.getMessage(), result.getData());

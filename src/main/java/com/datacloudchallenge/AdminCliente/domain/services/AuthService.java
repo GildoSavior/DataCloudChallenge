@@ -21,6 +21,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Optional;
+
 @Service
 public class AuthService implements AuthUseCase {
 
@@ -88,6 +92,7 @@ public class AuthService implements AuthUseCase {
             userUpdated.setName(user.getName());
             userUpdated.setEmail(user.getEmail());
             userUpdated.setAccessLevel(user.getAccessLevel());
+            userUpdated.setLastLogin(LocalDateTime.now());
 
             userRepository.save(userUpdated);
             userRepository.flush();
@@ -120,6 +125,11 @@ public class AuthService implements AuthUseCase {
 
             String role = userDetails.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority).findFirst().get();
+
+            UserModel userToUpdate = userRepository.findByPhoneNumber(request.getPhoneNumber()).orElse(null);
+            assert userToUpdate != null;
+            userToUpdate.setLastLogin(LocalDateTime.now());
+            userRepository.save(userToUpdate);
 
             AuthResponse response = new AuthResponse(request.getPhoneNumber(),  AccessLevel.valueOf(role), jwtToken);
 

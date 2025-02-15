@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "http://localhost:5500")
 @RestController
 @RequestMapping("/api/client")
 @PreAuthorize("hasRole('ROLE_CLIENT')")
@@ -19,9 +20,8 @@ public class ClientController {
     private UserUseCase userUseCase;
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile(Authentication authentication) {
-        String username = authentication.getName();
-        Result<UserDto> result = userUseCase.findUserByPhoneNumber(username);
+    public ResponseEntity<?> getProfile(@RequestParam String phoneNumber) {
+        Result<UserDto> result = userUseCase.findUserByPhoneNumber(phoneNumber);
         HttpResponse<UserDto> response = new HttpResponse<>(result.getMessage(), result.getData());
         return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }

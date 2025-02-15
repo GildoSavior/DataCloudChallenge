@@ -3,6 +3,9 @@ package com.datacloudchallenge.AdminCliente.domain.dtos.user;
 import com.datacloudchallenge.AdminCliente.data.enums.AccessLevel;
 import com.datacloudchallenge.AdminCliente.data.models.UserModel;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 public class UserDto {
 
     public static final String DEFAULT_PASSWORD = "12345";
@@ -18,6 +21,7 @@ public class UserDto {
     private String password = DEFAULT_PASSWORD;
 
     private AccessLevel accessLevel;
+    private LocalDateTime lastLogin;
 
     public String getName() {
         return name;
@@ -40,6 +44,10 @@ public class UserDto {
     }
 
     public String getPassword() {return password;}
+
+    public LocalDateTime getLastLogin() {
+        return lastLogin;
+    }
 
     public void setName(String name) {
         this.name = name;
@@ -65,18 +73,23 @@ public class UserDto {
         this.password = password;
     }
 
+    public void setLastLogin(LocalDateTime lastLogin) {
+        this.lastLogin = lastLogin;
+    }
+
     public UserDto() {
     }
 
-    public UserDto(String name, String imageUrl, String phoneNumber, String email, String password, AccessLevel accessLevel) {
+
+    public UserDto(String name, String imageUrl, String phoneNumber, String email, String password, AccessLevel accessLevel, LocalDateTime lastLogin) {
         this.name = name;
         this.imageUrl = imageUrl;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.password = password;
         this.accessLevel = accessLevel;
+        this.lastLogin = lastLogin;
     }
-
 
     public static UserDto userToUserDto(UserModel userModel) {
         UserDto userDto = new UserDto();
@@ -86,6 +99,7 @@ public class UserDto {
         userDto.setPassword(userModel.getPassword());
         userDto.setAccessLevel(userModel.getAccessLevel());
         userDto.setImageUrl(userModel.getImageUrl());
+        userDto.setLastLogin(userModel.getLastLogin());
         return userDto;
     }
 }

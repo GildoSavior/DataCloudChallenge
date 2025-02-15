@@ -2,10 +2,9 @@ package com.datacloudchallenge.AdminCliente.data.models;
 
 import com.datacloudchallenge.AdminCliente.data.enums.AccessLevel;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.NotNull;
 
+
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity(name = "users")
@@ -18,20 +17,17 @@ public class UserModel {
 
     private String imageUrl;
 
-    private Date data;
-
     @Column(name = "phone_number", length = 9, nullable = false)
     private String phoneNumber;
 
     private String email;
-
 
     private String password;
 
     @Enumerated(EnumType.STRING)
     private AccessLevel accessLevel;
 
-    private Date lastLogin;
+    private LocalDateTime lastLogin;
 
     private boolean enabled;
 
@@ -47,9 +43,6 @@ public class UserModel {
         return imageUrl;
     }
 
-    public Date getData() {
-        return data;
-    }
 
     public String getPhoneNumber() {
         return phoneNumber;
@@ -67,7 +60,7 @@ public class UserModel {
         return accessLevel;
     }
 
-    public Date getLastLogin() {
+    public LocalDateTime getLastLogin() {
         return lastLogin;
     }
 
@@ -87,9 +80,6 @@ public class UserModel {
         this.imageUrl = imageUrl;
     }
 
-    public void setData(Date data) {
-        this.data = data;
-    }
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
@@ -107,7 +97,7 @@ public class UserModel {
         this.accessLevel = accessLevel;
     }
 
-    public void setLastLogin(Date lastLogin) {
+    public void setLastLogin(LocalDateTime lastLogin) {
         this.lastLogin = lastLogin;
     }
 
@@ -120,11 +110,10 @@ public class UserModel {
 
 
 
-    public UserModel(Long id, String name, String imageUrl, Date data, String phoneNumber, String email, String password, AccessLevel accessLevel, Date lastLogin, boolean enabled) {
+    public UserModel(Long id, String name, String imageUrl, String phoneNumber, String email, String password, AccessLevel accessLevel, LocalDateTime lastLogin, boolean enabled) {
         this.id = id;
         this.name = name;
         this.imageUrl = imageUrl;
-        this.data = data;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.password = password;
