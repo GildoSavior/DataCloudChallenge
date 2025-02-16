@@ -27,14 +27,14 @@ public class AdminController {
         return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
-    @PostMapping("/clients")
+    @PostMapping("/user")
     public ResponseEntity<?> createClient(@RequestBody UserDto user) {
         Result<UserDto> result = userUseCase.createUser(user);
         return result.isOk() ? ResponseEntity.ok(new HttpResponse<>(result.getMessage(), result.getData())) :
                 ResponseEntity.badRequest().body(new HttpResponse<>(result.getMessage(), result.getData()));
     }
 
-    @PutMapping("/users")
+    @PutMapping("/user")
     public ResponseEntity<?> updateUser(@RequestParam String phoneNumber, @RequestBody UserDto user) {
         Result<UserDto> result = userUseCase.updateUser(phoneNumber, user);
         HttpResponse<UserDto> response = new HttpResponse<>(result.getMessage(), result.getData());
@@ -42,7 +42,7 @@ public class AdminController {
     }
 
 
-    @DeleteMapping("/users")
+    @DeleteMapping("/user")
     public ResponseEntity<?> delete(@RequestParam String phoneNumber) {
         Result<String> result = userUseCase.deleteUserByPhoneNumber(phoneNumber);
         HttpResponse<String> response = new HttpResponse<>(result.getMessage(), result.getData());

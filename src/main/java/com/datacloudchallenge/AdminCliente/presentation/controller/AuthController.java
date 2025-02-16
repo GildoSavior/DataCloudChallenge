@@ -36,11 +36,5 @@ public class AuthController {
         return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        Result<String> result = authUseCase.logout();
-        HttpResponse<String> response = new HttpResponse<>(result.getMessage(), result.getData());
-        return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
-    }
 }
 

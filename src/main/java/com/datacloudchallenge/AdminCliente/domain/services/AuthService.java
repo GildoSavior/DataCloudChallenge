@@ -139,16 +139,4 @@ public class AuthService implements AuthUseCase {
             return Result.failure(e.getMessage());
         }
     }
-
-    @Override
-    public Result<String> logout() {
-        try {
-            SecurityContextHolder.clearContext();
-            return Result.success(null, "Logout efetuado com sucesso");
-        } catch (Exception e) {
-            return Result.failure("Erro ao efetuar logout: " + e.getMessage());
-        }
-    }
-
-
 }

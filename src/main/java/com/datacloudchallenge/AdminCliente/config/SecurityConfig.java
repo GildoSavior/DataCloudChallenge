@@ -68,6 +68,8 @@ public class SecurityConfig {
         manager.setDeleteUserSql("DELETE FROM users WHERE phone_number = ?");
 
         manager.setCreateAuthoritySql("INSERT INTO authorities (phone_number, authority) VALUES (?, ?)");
+        manager.setDeleteUserAuthoritiesSql("DELETE FROM authorities WHERE phone_number = ?");
+
 
         return manager;
     }

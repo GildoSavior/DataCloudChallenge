@@ -19,23 +19,22 @@ public class ClientController {
     @Autowired
     private UserUseCase userUseCase;
 
-    @GetMapping("/profile")
+    @GetMapping("/user")
     public ResponseEntity<?> getProfile(@RequestParam String phoneNumber) {
         Result<UserDto> result = userUseCase.findUserByPhoneNumber(phoneNumber);
         HttpResponse<UserDto> response = new HttpResponse<>(result.getMessage(), result.getData());
         return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
-    @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestParam String userToUpdatePhoneNumber, @RequestBody UserDto user) {
-        Result<UserDto> result = userUseCase.updateUser(userToUpdatePhoneNumber, user);
+    @PutMapping("/user")
+    public ResponseEntity<?> updateProfile(@RequestParam String phoneNumber, @RequestBody UserDto user) {
+        Result<UserDto> result = userUseCase.updateUser(phoneNumber, user);
         HttpResponse<UserDto> response = new HttpResponse<>(result.getMessage(), result.getData());
         return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
-    @DeleteMapping("/profile")
-    public ResponseEntity<?> deleteProfile(Authentication authentication) {
-        String phoneNumber = authentication.getName();
+    @DeleteMapping("/user")
+    public ResponseEntity<?> deleteProfile(@RequestParam String phoneNumber) {
         Result<String> result = userUseCase.deleteUserByPhoneNumber(phoneNumber);
         HttpResponse<String> response = new HttpResponse<>(result.getMessage(), result.getData());
         return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);

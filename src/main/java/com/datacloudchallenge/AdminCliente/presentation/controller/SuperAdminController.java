@@ -35,21 +35,21 @@ public class SuperAdminController {
         return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
-    @PostMapping("/users")
+    @PostMapping("/user")
     public ResponseEntity<?> createUser(@RequestBody UserDto user) {
         Result<UserDto> result = userUseCase.createUser(user);
         HttpResponse<UserDto> response = new HttpResponse<>(result.getMessage(), result.getData());
         return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
-    @PutMapping("/users")
+    @PutMapping("/user")
     public ResponseEntity<?> updateUser(@RequestParam String phoneNumber, @RequestBody UserDto user) {
         Result<UserDto> result = userUseCase.updateUser(phoneNumber, user);
         HttpResponse<UserDto> response = new HttpResponse<>(result.getMessage(), result.getData());
         return result.isOk() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
-    @DeleteMapping("/users")
+    @DeleteMapping("/user")
     public ResponseEntity<?> deleteUser(@RequestParam String phoneNumber) {
         Result<String> result = userUseCase.deleteUserByPhoneNumber(phoneNumber);
         HttpResponse<String> response = new HttpResponse<>(result.getMessage(), result.getData());

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,7 +116,7 @@ public class UserService implements UserUseCase {
 
             UserDetails userDetails = User.withUsername(request.getPhoneNumber())
                     .password(encodedPassword)
-                    .authorities(AccessLevel.ROLE_CLIENT.name())
+                    .authorities(user.getAccessLevel().name())
                     .build();
 
             userDetailsManager.createUser(userDetails);
@@ -153,6 +154,11 @@ public class UserService implements UserUseCase {
             }
 
             if (getAuthenticatedUserRole() == AccessLevel.ROLE_SUPER_ADMIN) {
+                UserDetails userDetails = User.withUsername(userToUpdatePhoneNumber)
+                        .password(userToUpdate.getPassword())
+                        .authorities(resquest.getAccessLevel().name())
+                        .build();
+                userDetailsManager.updateUser(userDetails);
                 userToUpdate.setAccessLevel(resquest.getAccessLevel());
             }
 
@@ -178,6 +184,8 @@ public class UserService implements UserUseCase {
             boolean isUpdatingOwnInfo = phoneNumber.equals(SecurityUtil.getAuthenticatedPhoneNumber());
 
             AccessLevel userToDeleteAccessLevel = getTargetUser(phoneNumber).getAccessLevel();
+            if(userToDeleteAccessLevel.equals(AccessLevel.ROLE_SUPER_ADMIN))
+                return Result.failure("O Super Admin não pode ser eliminado");
 
             if (!hasPermission(isUpdatingOwnInfo, userToDeleteAccessLevel)) {
                 return Result.failure("Você não tem permissão para realizar essa ação.");
@@ -209,6 +217,22 @@ public class UserService implements UserUseCase {
 
         } catch (Exception e) {
             return Result.failure(e.getMessage());
+        }
+    }
+
+    @Override
+    public Result<UserDto> updateUserImage(String phoneNumber, String imageUrl) {
+
+        try {
+            UserModel user = repository.findByPhoneNumber(phoneNumber)
+                    .orElseThrow(() -> new RuntimeException("Utilizador não encontrado"));
+
+            user.setImageUrl(imageUrl);
+            UserModel updatedUser = repository.save(user);
+
+            return Result.success(UserDto.userToUserDto(updatedUser), "Imagem actualizada com sucesso");
+        } catch (Exception e) {
+            return  Result.failure("Falha ao actualizar imaga:" +  e);
         }
     }
 

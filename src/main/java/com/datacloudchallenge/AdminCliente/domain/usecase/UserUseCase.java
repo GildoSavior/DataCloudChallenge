@@ -13,4 +13,6 @@ public interface UserUseCase {
     Result<UserDto> updateUser(String userToUpdatePhoneNumber, UserDto user );
     Result<String> deleteUserByPhoneNumber(String phoneNumber);
     Result<UserDto> findUserByPhoneNumber(String phoneNumber);
+
+    Result<UserDto> updateUserImage(String phoneNumber, String imageUrl);
 }

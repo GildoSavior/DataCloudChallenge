@@ -8,5 +8,4 @@ import com.datacloudchallenge.AdminCliente.domain.dtos.auth.signup.SignUpRequest
 public interface AuthUseCase {
     Result<AuthResponse> createUser(SignUpRequest request);
     Result<AuthResponse> login(LoginRequest request);
-    Result<String> logout();
 }
