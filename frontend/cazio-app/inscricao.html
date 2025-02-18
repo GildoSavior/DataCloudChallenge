@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <title>Inscrição</title>
+  <meta content="Inscrição" property="og:title">
+  <meta content="Inscrição" property="twitter:title">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <link href="css/normalize.css" rel="stylesheet" type="text/css">
+  <link href="css/components.css" rel="stylesheet" type="text/css">
+  <link href="css/cazio-app.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin="anonymous">
+</head>
+<body>
+  <div class="auth-bg">
+    <div class="auth-form-wrapper w-form">
+      <form id="signup-form" class="auth-form">
+        <div class="form-content">
+          <div class="form-header">
+            <h1 class="pages-h2">Inscrição simplificada</h1>
+          </div>
+          
+          <div class="form-field-wrapper-2">
+            <label for="nome" class="field-label">Nome</label>
+            <input class="text-field w-input" maxlength="256" name="nome" id="nome" type="text" required>
+          </div>
+
+          <div class="form-field-wrapper-2">
+            <label for="telemovel" class="field-label">Número de telemóvel</label>
+            <input class="text-field w-input" maxlength="256" name="telemovel" id="telemovel" type="text" required>
+          </div>
+
+          <div class="form-field-wrapper-2">
+            <label for="email" class="field-label">Email</label>
+            <input class="text-field w-input" maxlength="256" name="email" id="email" type="email" required>
+          </div>
+
+          <div class="form-field-wrapper-2">
+            <label for="senha" class="field-label">Senha</label>
+            <input class="text-field w-input" maxlength="256" name="senha" id="senha" type="password" required>
+          </div>
+
+          <button type="submit" class="submit-button">Criar Conta</button>
+        </div>
+      </form>
+      
+      <div class="w-form-done">
+        <div>Cadastro realizado com sucesso!</div>
+      </div>
+      <div class="w-form-fail">
+        <div>Erro ao cadastrar! Tente novamente.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="signup.js"></script>
+</body>
+</html>
